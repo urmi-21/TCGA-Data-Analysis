@@ -1,6 +1,6 @@
 #a collection of functions/code to use TCGA metadata
 
-library(dplyr)
+library(plyr)
 library("readr")
 library(TCGAbiolinks)
 
@@ -58,12 +58,47 @@ printDatadim<-function(projName){
   print(paste("biospc dim:",dim(biospecimenBRCA)))
 }
 
+#a list of useful columns to retain from the TCGA metadata (to reduce the dimensions)
+colsToKeep<-c("clinical.submitter_id",
+              "clinical.classification_of_tumor",
+              "clinical.primary_diagnosis",
+              "clinical.tumor_stage",
+              "clinical.age_at_diagnosis",
+              "clinical.vital_status",
+              "clinical.days_to_death",
+              "clinical.tissue_or_organ_of_origin",
+              "clinical.days_to_birth",
+              "clinical.site_of_resection_or_biopsy",
+              "clinical.days_to_last_follow_up",
+              "clinical.cigarettes_per_day",
+              "clinical.weight",
+              "clinical.alcohol_history",
+              "clinical.bmi",
+              "clinical.years_smoked",
+              "clinical.height",
+              "clinical.gender",
+              "clinical.year_of_birth",
+              "clinical.race",
+              "clinical.ethnicity",
+              "clinical.year_of_death",
+              "clinical.bcr_patient_barcode",
+              "clinical.disease",
+              "submitter_id",
+              "sample_type",
+              "tissue_type",
+              "portions.submitter_id",
+              "portions.analytes.analyte_type",
+              "portions.analytes.submitter_id",
+              "portions.analytes.analyte_type_id",
+              "portions.analytes.aliquots.analyte_type",
+              "portions.analytes.aliquots.submitter_id")
 
-
-#################Example#######################
+#################Examples#######################
 
 #download BRCA metadata
 brcaMetadata<-getTCGAMetadata("TCGA-BRCA")
+#keep only selected columns
+brcaMetadata<-brcaMetadata[,colsToKeep]
 
 #download metadata of following projects into a single dataframe 
 tcgaProjList<-c("TCGA-BLCA","TCGA-HNSC","TCGA-ESCA","TCGA-PRAD")
