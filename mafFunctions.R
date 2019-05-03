@@ -38,10 +38,8 @@ maf<-read.maf(mafs,isTCGA = T)
 plotmafSummary(maf = maf)
 
 
-colnames(brcaMAF)
-#geneDataCols<-c( "Hugo_Symbol","Entrez_Gene_Id","NCBI_Build", "Chromosome","Start_Position","End_Position","Strand","Gene"  )
+#extract transcripts from maf
+ucsTids<-geneToTranscript(ucsmaf)
 
-brcaTids<-geneToTranscript(brcaMAF)
 
-#create a list of tids
 
