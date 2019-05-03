@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## BRCA data exploration
+This document is to demonstrates how to get started with TCGABiolinks and how to explote the mutation data at TCGA. Using study metadata is crucial to the analysis of TCGA datasets. I have provided some functions which user can use to format TCGA metadata and easily use that in analysis.
 
+Coming soon...
 
 
