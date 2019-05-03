@@ -26,8 +26,10 @@ geneToTranscript<-function(mafFile){
   return(distinct(mafFile[,c("Transcript_ID","Gene","Hugo_Symbol","ENSP","SWISSPROT","TREMBL","BIOTYPE","RefSeq")]))
 }
 
-#split maf file into categories by a given variable in the clinical metadata file
-##e.g., l1<-splitMafby(TCGAbrcaMetadata_reduced,"clinical.race",brcaMAF)
+#split maf file into categories by a given variable in the TCGA metadata file
+#e.g., maf_race<-splitMafby(brcaMetadata,"clinical.race",brcaMAF)
+#This will return a list of maf files each coressponding to a "clinical.race" category
+#For information of how to download metadata see tcgaMetadataFunctions.R
 splitMafby<-function(clinicalData,by,mafData){
   #get tumor samps fo different values of by
   myList<-list()
