@@ -26,6 +26,23 @@ geneToTranscript<-function(mafFile){
   return(distinct(mafFile[,c("Transcript_ID","Gene","Hugo_Symbol","ENSP","SWISSPROT","TREMBL","BIOTYPE","RefSeq")]))
 }
 
+#split maf file into categories by a given variable in the clinical metadata file
+##e.g., l1<-splitMafby(TCGAbrcaMetadata_reduced,"clinical.race",brcaMAF)
+splitMafby<-function(clinicalData,by,mafData){
+  #get tumor samps fo different values of by
+  myList<-list()
+  uniqVals<-clinicalData%>%select(by)%>%unique
+  for(i in 1:nrow(uniqVals)){
+    #i<-1
+    s<-as.character(uniqVals[i,1])
+    print(s)
+    tList<-clinicalData %>% filter(clinicalData[,by]==s) %>% select(portions.analytes.aliquots.submitter_id)%>%unique
+    thisData<-mafData%>%filter(Tumor_Sample_Barcode %in% tList$portions.analytes.aliquots.submitter_id)
+    myList[[s]]<-thisData
+  }
+  return(myList)
+}
+
 ###################################Example usage############################
 tcgamafProjList<-c("BLCA","BRCA","CESC","UCEC","UCS","READ","COAD","LIHC","HNSC","ESCA","PRAD","STAD","THCA","LUAD","LUSC","KIRC","KIRP","KICH")
 ucsmaf<-getmaf("UCS")
