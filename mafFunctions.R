@@ -29,7 +29,7 @@ geneToTranscript<-function(mafFile){
 #split maf file into categories by a given variable in the TCGA metadata file
 #e.g., maf_race<-splitMafby(brcaMetadata,"clinical.race",brcaMAF)
 #This will return a list of maf files each coressponding to a "clinical.race" category
-#For information of how to download metadata see tcgaMetadataFunctions.R
+#For information of how to download metadata see "tcgaMetadataFunctions.R"
 splitMafby<-function(clinicalData,by,mafData){
   #get tumor samps fo different values of by
   myList<-list()
@@ -44,6 +44,36 @@ splitMafby<-function(clinicalData,by,mafData){
   }
   return(myList)
 }
+
+
+#This function takes a list of maf files as input and saves the summary to a .pdf file using "plotmafSummary {maftools}"
+#e.g., plotSummaryTofile(splitMafby(brcaMetadata_reduced,"clinical.race",brcaMAF),"mutationSummary20.pdf")
+#this will produce variant summary of BRCA data separated by clinical.race category
+plotSummaryTofile<-function(mafList,fname){
+  l1<-mafList
+  #for each item in list do calculations
+  lnames<-names(l1)
+  plotList<-list()
+  k<-0
+  pdf(fname)
+  for(i in lnames){
+    print((i))
+    print(dim(l1[[i]]))
+    if(dim(l1[[i]])[1]<1){
+      next
+    }
+    #plot summary and save to pdf
+    maf<-read.maf(l1[[i]],isTCGA = T)
+    plotmafSummary(maf = maf, rmOutlier = TRUE, addStat = 'median', dashboard = T, titvRaw = FALSE,showBarcodes=F, top = 20)
+    mtext(paste("Mutation summary by",i), outer=T,  cex=NA, line=-1.5,side = 3)
+  }
+  dev.off()
+}
+
+
+
+
+
 
 ###################################Example usage############################
 tcgamafProjList<-c("BLCA","BRCA","CESC","UCEC","UCS","READ","COAD","LIHC","HNSC","ESCA","PRAD","STAD","THCA","LUAD","LUSC","KIRC","KIRP","KICH")
