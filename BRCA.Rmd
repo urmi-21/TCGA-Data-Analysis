@@ -7,13 +7,31 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+#load required libraries
+library(dplyr)
+library(plyr)
+library("readr")
+library(TCGAbiolinks)
 ```
 
 ## BRCA data exploration
-This is a short lesson on how to explore the mutation data at TCGA.
-Using study metadata is crucial to the analysis of TCGA datasets. I have provided some functions which user can use to format TCGA metadata and easily use that in analysis.
+This is a short lesson on how to explore the mutation data at TCGA using TCGABiolinks and maftools libraries.
+Using study metadata is crucial to the analysis of TCGA datasets. I have provided some functions which user can use to format TCGA metadata and easily use that in analysis. I will particulary look at BRCA data at TCGA but the methods and functions provided here could easily be extended to any cancer type.
 
 
 ## Downloading TCGA Metadata
+For all the data deposited in TCGA, there is associated clinical metadata. Clinical metadata could be critical in understanding the data from different perspectives. For example, the clinical data has information about tumor stage, gender, age etc. all of which could be helpful in data analysis from various perspectives.
 
+TCGAbiolinks provides the function "*GDCquery_clinic*"  to download the clinical metadata. The clinical metadata is separated into two categories i.e. Clinical and Biospecimen. More information on this is available at https://bioconductor.org/packages/release/bioc/vignettes/TCGAbiolinks/inst/doc/clinical.html
+
+A simple example to use *GDCquery_clinic* function is shown below:
+
+```{r }
+clinicalBRCA <- GDCquery_clinic(project = "TCGA-BRCA", type = "clinical")
+biospecimenBRCA <- GDCquery_clinic(project = "TCGA-BRCA", type = "Biospecimen")
+
+(head(clinicalBRCA))
+head(biospecimenBRCA)
+
+```
 
