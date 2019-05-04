@@ -30,8 +30,133 @@ A simple example to use *GDCquery_clinic* function is shown below:
 clinicalBRCA <- GDCquery_clinic(project = "TCGA-BRCA", type = "clinical")
 biospecimenBRCA <- GDCquery_clinic(project = "TCGA-BRCA", type = "Biospecimen")
 
-(head(clinicalBRCA))
+head(clinicalBRCA)
 head(biospecimenBRCA)
 
 ```
+
+The clinical metadata is saved in clinical and Biospecimen categories to represent two different type of data associated with each patient. This also removes a lot redundancy from the data had this been a single table. This structure is also reflected in the downloaded metadata and this makes it really hard to use the metadata.
+For example, in the *biospecimenBRCA* table, the column *portions* contain a dataframe for each row. This is beacuse a multiple portions could be mapped to a single *submitter_id* (for more information on metadata see: https://docs.cancergenomicscloud.org/docs/tcga-metadata). This is true for other columns *portions.analytes*, *portions.analytes.aliquots"* as well.
+
+I have written a function *getTCGAMetadata* to format the clinical metadata into one table. This makes the metadata simple and easy to use. Example usage is shown below:
+
+```{r }
+#function to expand columns of TCGA metadata from list to df. Used in getTCGAMetadata function
+expand<-function(df,colName){
+  res<-data.frame()
+  #for each row
+  for(i in 1: dim(df)[1]){
+    thisRow<-df[i, ! (colnames(df) %in% c(colName))]
+    tempdf<-as.data.frame(df[i, c(colName)])
+    #if list is empty skip that row
+    if(dim(tempdf)[1]<1){
+      next
+    }
+    #change colnames so they are unique
+    colnames(tempdf)<-paste(paste(colName,".",sep = ""),colnames(tempdf),sep = "")
+    #print(paste(i,colnames(tempdf)))
+    newRow<-cbind(thisRow,tempdf,row.names = NULL)
+    res<-bind_rows(res,newRow)
+    
+  }
+  #print(res)
+  return(res)
+}
+
+#function to download and combine TCGA clinical and Biospecimen metadata given a project name
+#example usage: getTCGAMetadata("TCGA-BRCA")
+getTCGAMetadata<-function(projName){
+  print(paste("Downloading",projName))
+  clinicalBRCA <- GDCquery_clinic(project = projName, type = "clinical")
+  biospecimenBRCA <- GDCquery_clinic(project = projName, type = "Biospecimen")
+  
+  #rename all cols from clinical table with suffix clinical
+  colnames(clinicalBRCA)<- paste0("clinical.",colnames(clinicalBRCA))
+  
+  #expand biospecimen data in the order portions, portions.analytes, portions.analytes.aliquots
+  toUnpack<-c("portions", "portions.analytes", "portions.analytes.aliquots")
+  for(s in toUnpack){
+    biospecimenBRCA<-expand(biospecimenBRCA,s)
+  }
+  #add patient barcode to biospecimen data
+  biospecimenBRCA<- biospecimenBRCA %>% mutate(clinical.bcr_patient_barcode=substr(submitter_id,1,nchar(as.character(submitter_id))-4))
+  #join clinical and biospecimen
+  finalJoined<-join(clinicalBRCA,biospecimenBRCA,by="clinical.bcr_patient_barcode")
+  return(finalJoined)
+}
+
+#a list of useful (suggested) columns to retain from the TCGA metadata (to reduce the dimensions)
+colsToKeep<-c("clinical.submitter_id",
+              "clinical.classification_of_tumor",
+              "clinical.primary_diagnosis",
+              "clinical.tumor_stage",
+              "clinical.age_at_diagnosis",
+              "clinical.vital_status",
+              "clinical.days_to_death",
+              "clinical.tissue_or_organ_of_origin",
+              "clinical.days_to_birth",
+              "clinical.site_of_resection_or_biopsy",
+              "clinical.days_to_last_follow_up",
+              "clinical.cigarettes_per_day",
+              "clinical.weight",
+              "clinical.alcohol_history",
+              "clinical.bmi",
+              "clinical.years_smoked",
+              "clinical.height",
+              "clinical.gender",
+              "clinical.year_of_birth",
+              "clinical.race",
+              "clinical.ethnicity",
+              "clinical.year_of_death",
+              "clinical.bcr_patient_barcode",
+              "clinical.disease",
+              "submitter_id",
+              "sample_type",
+              "tissue_type",
+              "portions.submitter_id",
+              "portions.analytes.analyte_type",
+              "portions.analytes.submitter_id",
+              "portions.analytes.analyte_type_id",
+              "portions.analytes.aliquots.analyte_type",
+              "portions.analytes.aliquots.submitter_id")
+
+
+#download BRCA metadata
+brcaMetadata<-getTCGAMetadata("TCGA-BRCA")
+#only keep useful columns
+brcaMetadata<-brcaMetadata[,colsToKeep]
+
+head(brcaMetadata)
+```
+
+Similarly to download and combine metadata from multiple TCGA project one can use:
+
+```{r eval=FALSE}
+#download metadata of following projects into a single dataframe 
+tcgaProjList<-c("TCGA-BLCA","TCGA-HNSC","TCGA-ESCA","TCGA-PRAD")
+#mdList will have all metadata for tcgaProjList
+mdListDF<-data.frame()
+for(s in tcgaProjList){
+  #mdList<-c(mdList,getjoinedBiospcClinc(s))
+  if(dim(mdListDF)[1]<1){
+    mdListDF<-getjoinedBiospcClinc(s)
+  }else{
+    temp<-getjoinedBiospcClinc(s)
+    mdListDF<-bind_rows(mdListDF,temp)  
+  }
+}
+```
+
+Now we can use the downloaded metadata in subsequent analysis.
+
+
+## Downloading Mutation Data
+
+
+The mutation data could be downloaded using TCGAbiolinks' *GDCquery_Maf* function. *GDCquery_Maf* will will download the mutation data in Mutation Annotation Format (MAF) aligned against hg38. Example usage is as follows:
+
+```{r eval=FALSE}
+BRCAmaf <- GDCquery_Maf("CHOL", pipelines = "varscan2")
+```
+
 

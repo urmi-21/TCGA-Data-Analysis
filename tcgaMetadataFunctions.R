@@ -5,7 +5,7 @@ library("readr")
 library(TCGAbiolinks)
 
 
-#function to expand columns of TCGA metadata from list to df
+#function to expand columns of TCGA metadata from list to df. Used in getTCGAMetadata function
 expand<-function(df,colName){
   res<-data.frame()
   #for each row
