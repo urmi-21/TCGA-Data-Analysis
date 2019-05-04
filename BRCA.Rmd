@@ -159,4 +159,25 @@ The mutation data could be downloaded using TCGAbiolinks' *GDCquery_Maf* functio
 BRCAmaf <- GDCquery_Maf("CHOL", pipelines = "varscan2")
 ```
 
+To download and combine multiple MAF files one can do as follows:
+
+```{r eval=FALSE}
+#function to download maf file given a project name
+getmaf<-function(projName){
+  thisMaf<-GDCquery_Maf(projName, pipelines = "varscan2")
+  return(thisMaf)
+}
+
+#function to download maf files given a list project names. Returned files is combined into one bigger file.
+getmafs<-function(projList){
+  allMaf<-data.frame()
+  for(p in projList){
+    temp<-GDCquery_Maf(p, pipelines = "varscan2")
+    allMaf<-rbind(allMaf,temp)
+  }
+  return(allMaf)
+}
+```
+
+
 
